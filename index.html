@@ -6,10 +6,8 @@
     <title>Ralex Perfumaria - Catálogo Minimalista</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
-    
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Montserrat:wght@300;400;500;600&display=swap');
         
@@ -20,6 +18,7 @@
             font-family: 'Montserrat', sans-serif;
         }
         
+        /* Custom Scrollbar */
         ::-webkit-scrollbar {
             width: 4px;
         }
@@ -140,7 +139,9 @@
                 </div>
             </section>
 
+
             <section id="seller-view" class="hidden space-y-6">
+                
                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pb-6 border-b border-white/5">
                     <div>
                         <div class="flex items-center gap-1.5 text-gold text-[10px] uppercase tracking-widest font-semibold mb-1">
@@ -190,6 +191,7 @@
                     </div>
                 </div>
             </section>
+
         </div>
     </main>
 
@@ -290,7 +292,7 @@
 
                 <div>
                     <label class="block text-[10px] uppercase tracking-wider text-gray-400 mb-1">Breve Descrição Olfativa *</label>
-                    <textarea id="p-desc" rows="3" required placeholder="Ex: Notas alegres de flores frescas de jasmim e toque cítrico de tangerina..." class="w-full bg-dark-950 border border-white/10 focus:border-gold/50 rounded p-2 text-gray-200 focus:outline-none resize-none"></textarea>
+                    <textarea id="p-desc" rows="3" required placeholder="Ex: Notas alegres de flores frescas de jasmim..." class="w-full bg-dark-950 border border-white/10 focus:border-gold/50 rounded p-2 text-gray-200 focus:outline-none resize-none"></textarea>
                 </div>
 
                 <div class="pt-3 border-t border-white/5 flex gap-2 justify-end">
@@ -323,7 +325,6 @@
                     </div>
 
                     <div class="h-px bg-white/5"></div>
-
                     <p id="details-desc" class="text-gray-400 text-xs leading-relaxed font-light"></p>
                 </div>
 
@@ -343,7 +344,6 @@
 
     <div id="cart-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex justify-end hidden">
         <div class="bg-dark-900 border-l border-white/5 max-w-sm w-full h-full p-5 flex flex-col justify-between shadow-2xl transform translate-x-full transition-all duration-300">
-            
             <div class="flex items-center justify-between pb-3 border-b border-white/5">
                 <div class="flex items-center gap-2 text-gold">
                     <i data-lucide="shopping-bag" class="w-4 h-4"></i>
@@ -354,15 +354,13 @@
                 </button>
             </div>
 
-            <div id="cart-items-list" class="flex-grow overflow-y-auto py-3 space-y-3">
-                </div>
+            <div id="cart-items-list" class="flex-grow overflow-y-auto py-3 space-y-3"></div>
 
             <div class="pt-3 border-t border-white/5 space-y-3">
                 <div class="flex justify-between items-center text-xs">
                     <span class="text-gray-400 uppercase tracking-wider">Total</span>
                     <span id="cart-subtotal" class="text-white font-bold text-base">R$ 0,00</span>
                 </div>
-
                 <button onclick="checkoutToWhatsApp()" id="checkout-btn" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 rounded flex items-center justify-center gap-1.5 transition-all text-[10px] uppercase tracking-wider">
                     <i data-lucide="message-square" class="w-4 h-4"></i>
                     Enviar Pedido por WhatsApp
@@ -373,26 +371,22 @@
 
     <script>
         const WHATSAPP_NUMBER = "+5516997337321";
-        const ADMIN_PASSWORD_HASH = "Raquel2026"; 
+        const ADMIN_PASSWORD_HASH = "Raquel2026";
         let isSellerAuthenticated = false;
 
-        // ==========================================
-        // CONFIGURAÇÃO DO FIREBASE
-        // Substitua os valores abaixo pelos dados do seu Console Firebase
-        // ==========================================
+        // --- CREDENCIAIS DO SEU PROJETO EXTRATÍDAS DA SUA IMAGEM ---
         const firebaseConfig = {
-            apiKey: "SUA_API_KEY_AQUI",
-            authDomain: "SEU_PROJECT_ID.firebaseapp.com",
-            projectId: "SEU_PROJECT_ID",
-            storageBucket: "SEU_PROJECT_ID.appspot.com",
-            messagingSenderId: "SEU_SENDER_ID",
-            appId: "SUA_APP_ID"
+            apiKey: "AIzaSyA3P3QtgV-CxH7UA3U9M4SeqIH5o61Prg",
+            authDomain: "ralex-perfumaria.firebaseapp.com",
+            projectId: "ralex-perfumaria",
+            storageBucket: "ralex-perfumaria.firebasestorage.app",
+            messagingSenderId: "629346583696",
+            appId: "1:629346583696:web:42a25a7d7185c59cc98415"
         };
 
-        // Inicializando o Firebase
+        // Inicializar Firebase e Firestore
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
-        const productsCollection = db.collection('products');
 
         let products = [];
         let cart = JSON.parse(localStorage.getItem('ralex_clean_cart')) || [];
@@ -400,45 +394,36 @@
         let currentView = 'customer';
 
         window.addEventListener('DOMContentLoaded', () => {
-            // Escuta ativa do banco de dados na nuvem (atualiza no PC e celular ao mesmo tempo)
-            productsCollection.orderBy('createdAt', 'desc').onSnapshot((snapshot) => {
-                products = [];
-                snapshot.forEach((doc) => {
-                    products.push({ id: doc.id, ...doc.data() });
-                });
-                
-                // Se a nuvem estiver vazia na primeira inicialização, adiciona os perfumes padrão automaticamente
-                if (products.length === 0) {
-                    initializeDefaultProducts();
-                } else {
-                    if (currentView === 'customer') {
-                        renderCustomerProducts();
-                    } else {
-                        renderAdminProductsTable();
-                    }
-                }
-            }, (error) => {
-                console.error("Erro ao carregar dados online: ", error);
-                showToast("Erro ao conectar ao banco online.", "alert-triangle");
-            });
-
+            loadProductsFromFirebase();
             updateCartCount();
             lucide.createIcons();
         });
 
-        // Alimenta o banco online na primeira vez caso ele inicie limpo
-        function initializeDefaultProducts() {
-            const defaultProducts = [
-                { name: "Oud Soft", brand: "Ralex Private", price: 40.00, volume: "100ml", origin: "importado", scent: "amadeirado", desc: "Uma brisa leve com toques sutis de sândalo e flores do campo.", image: "", createdAt: firebase.firestore.FieldValue.serverTimestamp() },
-                { name: "Orchidée Blanche", brand: "Ralex Paris", price: 40.00, volume: "80ml", origin: "importado", scent: "floral", desc: "Frescor de flores brancas com um toque delicado e doce de baunilha.", image: "", createdAt: firebase.firestore.FieldValue.serverTimestamp() }
-            ];
-            defaultProducts.forEach(p => productsCollection.add(p));
+        // Escuta em tempo real as mudanças no banco do Firebase
+        function loadProductsFromFirebase() {
+            db.collection("produtos").onSnapshot((querySnapshot) => {
+                products = [];
+                querySnapshot.forEach((doc) => {
+                    let data = doc.data();
+                    data.id = doc.id; // Define o ID vindo do Firebase
+                    products.push(data);
+                });
+                
+                // Renderiza as telas automaticamente assim que os dados chegam
+                if (currentView === 'customer') {
+                    renderCustomerProducts();
+                } else {
+                    renderAdminProductsTable();
+                }
+            }, (error) => {
+                console.error("Erro ao carregar dados do Firebase: ", error);
+                showToast("Erro ao conectar ao Firebase. Verifique as Regras do Firestore.", "alert-triangle");
+            });
         }
 
         // Controle de telas
         function changeView(view) {
             currentView = view;
-            
             const customerSec = document.getElementById('customer-view');
             const sellerSec = document.getElementById('seller-view');
             const heroBanner = document.getElementById('hero-banner');
@@ -449,7 +434,6 @@
                 customerSec.classList.remove('hidden');
                 sellerSec.classList.add('hidden');
                 heroBanner.classList.remove('hidden');
-                
                 navHome.classList.add('text-gold');
                 navHome.classList.remove('text-gray-400');
                 navSeller.classList.remove('text-gold');
@@ -459,25 +443,21 @@
                 customerSec.classList.add('hidden');
                 sellerSec.classList.remove('hidden');
                 heroBanner.classList.add('hidden');
-                
                 navHome.classList.remove('text-gold');
                 navHome.classList.add('text-gray-400');
                 navSeller.classList.add('text-gold');
-                navSeller.classList.remove('text-gray-400');
-
+                navSeller.classList.add('text-gray-400');
                 renderAdminProductsTable();
             }
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        // Sistema de senha
         function requestAdminAccess() {
             if (isSellerAuthenticated) {
                 changeView('seller');
             } else {
                 document.getElementById('admin-password').value = '';
-                const authModal = document.getElementById('auth-modal');
-                authModal.classList.remove('hidden');
+                document.getElementById('auth-modal').classList.remove('hidden');
             }
         }
 
@@ -494,7 +474,6 @@
         function verifyAdminPassword(event) {
             event.preventDefault();
             const typedPassword = document.getElementById('admin-password').value;
-            
             if (typedPassword === ADMIN_PASSWORD_HASH) {
                 isSellerAuthenticated = true;
                 closeAuthModal();
@@ -505,27 +484,22 @@
             }
         }
 
-        // Carregar imagem local do dispositivo
         function handleImageUpload(event) {
             const file = event.target.files[0];
             if (!file) return;
-
             if (file.size > 850 * 1024) {
-                showToast("Escolha uma foto de tamanho menor (até 800KB).", "alert-triangle");
+                showToast("Escolha uma foto menor (até 800KB).", "alert-triangle");
                 event.target.value = '';
                 return;
             }
-
             const reader = new FileReader();
             reader.onload = function(e) {
                 const base64Data = e.target.result;
                 document.getElementById('p-image-data').value = base64Data;
-                
                 const previewState = document.getElementById('upload-preview-state');
                 previewState.innerHTML = `
                     <img src="${base64Data}" class="w-10 h-10 object-cover rounded mx-auto mb-1 border border-gold/40">
                     <p class="text-[9px] text-gold font-medium">Foto carregada com sucesso!</p>
-                    <p class="text-[8px] text-gray-400">Clique se quiser escolher outra</p>
                 `;
                 lucide.createIcons();
             }
@@ -536,21 +510,17 @@
             const toast = document.getElementById('toast');
             const msgSpan = document.getElementById('toast-message');
             const iconSpan = document.getElementById('toast-icon');
-
             msgSpan.textContent = message;
             iconSpan.innerHTML = `<i data-lucide="${iconName}" class="w-4 h-4"></i>`;
             lucide.createIcons();
-
             toast.classList.remove('translate-y-20', 'opacity-0');
             toast.classList.add('translate-y-0', 'opacity-100');
-
             setTimeout(() => {
                 toast.classList.add('translate-y-20', 'opacity-0');
                 toast.classList.remove('translate-y-0', 'opacity-100');
             }, 3000);
         }
 
-        // Renderizar catálogo
         function renderCustomerProducts(filteredList = null) {
             const listToRender = filteredList || products;
             const grid = document.getElementById('products-grid');
@@ -570,12 +540,9 @@
             grid.classList.remove('hidden');
 
             listToRender.forEach(prod => {
-                let imgContent = '';
-                if (prod.image && prod.image.trim() !== "") {
-                    imgContent = `<img src="${prod.image}" alt="${prod.name}" class="w-full h-full object-cover transition-transform duration-500 hover:scale-105" onerror="this.onerror=null; this.parentElement.innerHTML=getPerfumePlaceholderSvg();">`;
-                } else {
-                    imgContent = getPerfumePlaceholderSvg();
-                }
+                let imgContent = (prod.image && prod.image.trim() !== "") 
+                    ? `<img src="${prod.image}" alt="${prod.name}" class="w-full h-full object-cover transition-transform duration-500 hover:scale-105" onerror="this.onerror=null; this.parentElement.innerHTML=getPerfumePlaceholderSvg();">`
+                    : getPerfumePlaceholderSvg();
 
                 const card = document.createElement('div');
                 card.className = "bg-dark-900 border border-white/5 hover:border-gold/30 rounded-lg overflow-hidden flex flex-col justify-between transition-all";
@@ -596,7 +563,7 @@
                     <div class="p-4 pt-0">
                         <div class="h-px bg-white/5 mb-3"></div>
                         <div class="flex items-center justify-between">
-                            <span class="text-white font-medium text-xs">R$ ${parseFloat(prod.price).toFixed(2).replace('.', ',')}</span>
+                            <span class="text-white font-medium text-xs">R$ ${prod.price.toFixed(2).replace('.', ',')}</span>
                             <button onclick="addToCart('${prod.id}')" class="bg-dark-950 border border-white/10 hover:border-gold text-gold hover:text-dark-950 hover:bg-gold p-2 rounded transition-all">
                                 <i data-lucide="shopping-bag" class="w-3.5 h-3.5"></i>
                             </button>
@@ -636,9 +603,8 @@
                 tab.classList.remove('bg-gold', 'text-dark-950', 'active');
                 tab.classList.add('bg-dark-900', 'text-gray-400');
             });
-            const target = event.currentTarget || event.target;
-            target.classList.remove('bg-dark-900', 'text-gray-400');
-            target.classList.add('bg-gold', 'text-dark-950', 'active');
+            event.currentTarget.classList.remove('bg-dark-900', 'text-gray-400');
+            event.currentTarget.classList.add('bg-gold', 'text-dark-950', 'active');
             filterProducts();
         }
 
@@ -648,17 +614,15 @@
 
             document.getElementById('details-name').textContent = prod.name;
             document.getElementById('details-brand').textContent = prod.brand;
-            document.getElementById('details-price').textContent = `R$ ${parseFloat(prod.price).toFixed(2).replace('.', ',')}`;
+            document.getElementById('details-price').textContent = `R$ ${prod.price.toFixed(2).replace('.', ',')}`;
             document.getElementById('details-volume').textContent = prod.volume || '100ml';
             document.getElementById('details-desc').textContent = prod.desc;
             document.getElementById('details-badge').textContent = prod.origin;
 
             const imgContainer = document.getElementById('details-img-container');
-            if (prod.image && prod.image.trim() !== "") {
-                imgContainer.innerHTML = `<img src="${prod.image}" alt="${prod.name}" class="max-h-56 max-w-full object-contain rounded" onerror="this.onerror=null; this.parentElement.innerHTML=getPerfumePlaceholderSvg();">`;
-            } else {
-                imgContainer.innerHTML = getPerfumePlaceholderSvg();
-            }
+            imgContainer.innerHTML = (prod.image && prod.image.trim() !== "")
+                ? `<img src="${prod.image}" alt="${prod.name}" class="max-h-56 max-w-full object-contain rounded" onerror="this.onerror=null; this.parentElement.innerHTML=getPerfumePlaceholderSvg();">`
+                : getPerfumePlaceholderSvg();
 
             document.getElementById('details-add-to-cart-btn').onclick = () => {
                 addToCart(prod.id);
@@ -668,8 +632,7 @@
                 checkoutSingleProduct(prod);
             };
 
-            const modal = document.getElementById('details-modal');
-            modal.classList.remove('hidden');
+            document.getElementById('details-modal').classList.remove('hidden');
             lucide.createIcons();
         }
 
@@ -685,28 +648,25 @@
         function toggleCartModal() {
             const modal = document.getElementById('cart-modal');
             const inner = modal.firstElementChild;
-
             if (modal.classList.contains('hidden')) {
                 renderCartItems();
                 modal.classList.remove('hidden');
-                setTimeout(() => { inner.classList.remove('translate-x-full'); }, 10);
+                setTimeout(() => inner.classList.remove('translate-x-full'), 10);
             } else {
                 inner.classList.add('translate-x-full');
-                setTimeout(() => { modal.classList.add('hidden'); }, 250);
+                setTimeout(() => modal.classList.add('hidden'), 250);
             }
         }
 
         function addToCart(id) {
             const prod = products.find(p => p.id === id);
             if (!prod) return;
-
             const existing = cart.find(item => item.id === id);
             if (existing) {
                 existing.quantity += 1;
             } else {
                 cart.push({ ...prod, quantity: 1 });
             }
-
             localStorage.setItem('ralex_clean_cart', JSON.stringify(cart));
             updateCartCount();
             showToast(`${prod.name} adicionado à sacola!`, 'shopping-bag');
@@ -715,13 +675,11 @@
         function changeCartQty(id, change) {
             const item = cart.find(i => i.id === id);
             if (!item) return;
-
             item.quantity += change;
             if (item.quantity <= 0) {
                 cart = cart.filter(i => i.id !== id);
                 showToast(`Removido da sacola`, 'trash-2');
             }
-
             localStorage.setItem('ralex_clean_cart', JSON.stringify(cart));
             updateCartCount();
             renderCartItems();
@@ -732,38 +690,48 @@
             container.innerHTML = '';
 
             if (cart.length === 0) {
-                container.innerHTML = `<div class="flex flex-col items-center justify-center py-12 text-gray-500 space-y-2"><p class="text-xs">Sua sacola está vazia.</p></div>`;
+                container.innerHTML = `
+                    <div class="flex flex-col items-center justify-center text-center py-12 text-gray-500 space-y-2">
+                        <i data-lucide="shopping-bag" class="w-8 h-8 text-gray-600"></i>
+                        <p class="text-xs">Sua sacola está vazia.</p>
+                    </div>
+                `;
                 document.getElementById('cart-subtotal').textContent = "R$ 0,00";
                 document.getElementById('checkout-btn').disabled = true;
+                document.getElementById('checkout-btn').classList.add('opacity-40');
+                lucide.createIcons();
                 return;
             }
 
             document.getElementById('checkout-btn').disabled = false;
+            document.getElementById('checkout-btn').classList.remove('opacity-40');
             let total = 0;
 
             cart.forEach(item => {
                 const sub = item.price * item.quantity;
                 total += sub;
-
-                let imgContent = item.image ? `<img src="${item.image}" class="w-full h-full object-cover rounded">` : getPerfumePlaceholderSvg();
+                let imgContent = (item.image && item.image.trim() !== "")
+                    ? `<img src="${item.image}" alt="${item.name}" class="w-full h-full object-cover rounded" onerror="this.onerror=null; this.parentElement.innerHTML=getPerfumePlaceholderSvg();">`
+                    : getPerfumePlaceholderSvg();
 
                 const itemDiv = document.createElement('div');
                 itemDiv.className = "flex gap-3 bg-dark-950 p-2.5 rounded border border-white/5 items-center justify-between text-xs";
                 itemDiv.innerHTML = `
-                    <div class="w-10 h-10 bg-dark-900 flex items-center justify-center p-1 rounded overflow-hidden">${imgContent}</div>
-                    <div class="flex-grow">
+                    <div class="w-10 h-10 bg-dark-900 flex items-center justify-center p-1 rounded overflow-hidden">
+                        ${imgContent}
+                    </div>
+                    <div class="flex-grow space-y-0.5">
                         <h4 class="font-medium text-white line-clamp-1">${item.name}</h4>
-                        <span class="text-gray-500 text-[10px]">R$ ${parseFloat(item.price).toFixed(2).replace('.', ',')}</span>
+                        <span class="text-gray-500 text-[10px]">R$ ${item.price.toFixed(2).replace('.', ',')}</span>
                     </div>
                     <div class="flex items-center gap-1.5">
-                        <button onclick="changeCartQty('${item.id}', -1)" class="w-5 h-5 rounded bg-dark-900 text-gray-400 font-bold text-[10px]">-</button>
-                        <span class="text-white">${item.quantity}</span>
-                        <button onclick="changeCartQty('${item.id}', 1)" class="w-5 h-5 rounded bg-dark-900 text-gray-400 font-bold text-[10px]">+</button>
+                        <button onclick="changeCartQty('${item.id}', -1)" class="w-5 h-5 rounded bg-dark-900 border border-white/10 text-gray-400 flex items-center justify-center font-bold text-[10px]">-</button>
+                        <span class="text-[11px] font-semibold text-white w-3 text-center">${item.quantity}</span>
+                        <button onclick="changeCartQty('${item.id}', 1)" class="w-5 h-5 rounded bg-dark-900 border border-white/10 text-gray-400 flex items-center justify-center font-bold text-[10px]">+</button>
                     </div>
                 `;
                 container.appendChild(itemDiv);
             });
-
             document.getElementById('cart-subtotal').textContent = `R$ ${total.toFixed(2).replace('.', ',')}`;
             lucide.createIcons();
         }
@@ -775,28 +743,34 @@
             cart.forEach((item) => {
                 const itemSubtotal = item.price * item.quantity;
                 total += itemSubtotal;
-                message += `• *${item.name}* (${item.brand})\n  Qtd: ${item.quantity} | Vol: ${item.volume || '100ml'}\n  Valor: R$ ${itemSubtotal.toFixed(2).replace('.', ',')}\n\n`;
+                message += `• *${item.name}* (${item.brand})\n`;
+                message += `  Qtd: ${item.quantity} | Vol: ${item.volume || '100ml'}\n`;
+                message += `  Valor: R$ ${itemSubtotal.toFixed(2).replace('.', ',')}\n\n`;
             });
-            message += `👑 *TOTAL DO PEDIDO:* *R$ ${total.toFixed(2).replace('.', ',')}*\n\nGostaria de combinar a entrega!`;
-            window.open(`https://api.whatsapp.com/send?phone=${WHATSAPP_NUMBER}&text=${encodeURIComponent(message)}`, '_blank');
+            message += `👑 *TOTAL DO PEDIDO:* *R$ ${total.toFixed(2).replace('.', ',')}*\n\n`;
+            message += "Gostaria de combinar os detalhes da entrega e do pagamento!";
+
+            const encodedMessage = encodeURIComponent(message);
             cart = [];
             localStorage.setItem('ralex_clean_cart', JSON.stringify(cart));
             updateCartCount();
             toggleCartModal();
+            window.open(`https://api.whatsapp.com/send?phone=${WHATSAPP_NUMBER}&text=${encodedMessage}`, '_blank');
         }
 
         function checkoutSingleProduct(prod) {
-            let message = "⚜️ *RALEX PERFUMARIA - INTERESSE DIRETO* ⚜️\n\nOlá! Tenho interesse no perfume:\n\n• *Fragrância:* ${prod.name}\n• *Marca:* ${prod.brand}\n• *Preço:* R$ ${parseFloat(prod.price).toFixed(2).replace('.', ',')}\n\nGostaria de ver as opções de entrega.";
+            let message = "⚜️ *RALEX PERFUMARIA - INTERESSE DIRETO* ⚜️\n\nOlá! Tenho interesse no perfume:\n\n";
+            message += `• *Fragrância:* ${prod.name}\n• *Marca:* ${prod.brand}\n• *Volume:* ${prod.volume || '100ml'}\n• *Preço:* R$ ${prod.price.toFixed(2).replace('.', ',')}\n\nGostaria de ver as opções de entrega.`;
             window.open(`https://api.whatsapp.com/send?phone=${WHATSAPP_NUMBER}&text=${encodeURIComponent(message)}`, '_blank');
         }
 
-        // Painel do Vendedor Online
+        // --- PAINEL DO VENDEDOR (ADMIN SALVANDO NO FIREBASE) ---
         function renderAdminProductsTable(filteredList = null) {
             const listToRender = filteredList || products;
             const tbody = document.getElementById('admin-products-table');
             const noProductsAdmin = document.getElementById('admin-no-products');
-
             tbody.innerHTML = '';
+
             if (listToRender.length === 0) {
                 noProductsAdmin.classList.remove('hidden');
                 tbody.parentElement.parentElement.classList.add('hidden');
@@ -807,21 +781,32 @@
             tbody.parentElement.parentElement.classList.remove('hidden');
 
             listToRender.forEach(prod => {
-                let imgContent = prod.image ? `<img src="${prod.image}" class="w-8 h-8 object-cover rounded">` : getPerfumePlaceholderSvg();
+                let imgContent = (prod.image && prod.image.trim() !== "")
+                    ? `<img src="${prod.image}" alt="${prod.name}" class="w-8 h-8 object-cover rounded border border-white/5" onerror="this.onerror=null; this.parentElement.innerHTML=getPerfumePlaceholderSvg();">`
+                    : `<div class="w-8 h-8 flex items-center justify-center bg-dark-950 rounded border border-white/5 text-gold">${getPerfumePlaceholderSvg()}</div>`;
 
                 const tr = document.createElement('tr');
                 tr.className = "hover:bg-white/5 transition-colors";
                 tr.innerHTML = `
                     <td class="py-3 px-4 flex items-center gap-2.5">
                         <div class="w-8 h-8 bg-dark-950 rounded flex items-center justify-center overflow-hidden">${imgContent}</div>
-                        <div><span class="font-medium text-white block">${prod.name}</span><span class="text-[9px] text-gray-500 uppercase">${prod.brand}</span></div>
+                        <div>
+                            <span class="font-medium text-white block">${prod.name}</span>
+                            <span class="text-[9px] text-gray-500 uppercase tracking-wider">${prod.brand}</span>
+                        </div>
                     </td>
-                    <td class="py-3 px-4"><span class="text-[10px] uppercase bg-white/5 px-2 py-0.5 rounded-full text-gray-400">${prod.origin}</span></td>
-                    <td class="py-3 px-4 text-gold font-semibold">R$ ${parseFloat(prod.price).toFixed(2).replace('.', ',')}</td>
+                    <td class="py-3 px-4">
+                        <span class="text-[10px] uppercase bg-white/5 px-2 py-0.5 rounded-full text-gray-400 border border-white/10">${prod.origin}</span>
+                    </td>
+                    <td class="py-3 px-4 text-gold font-semibold">R$ ${prod.price.toFixed(2).replace('.', ',')}</td>
                     <td class="py-3 px-4">
                         <div class="flex gap-1.5 justify-center">
-                            <button onclick="openEditProductModal('${prod.id}')" class="p-1.5 text-blue-400"><i data-lucide="edit-3" class="w-3.5 h-3.5"></i></button>
-                            <button onclick="deleteProduct('${prod.id}')" class="p-1.5 text-rose-400"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
+                            <button onclick="openEditProductModal('${prod.id}')" class="p-1.5 bg-blue-600/10 border border-blue-500/20 hover:border-blue-500 text-blue-400 rounded transition-all">
+                                <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
+                            </button>
+                            <button onclick="deleteProduct('${prod.id}')" class="p-1.5 bg-rose-600/10 border border-rose-500/20 hover:border-rose-500 text-rose-400 rounded transition-all">
+                                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                            </button>
                         </div>
                     </td>
                 `;
@@ -839,10 +824,14 @@
         function openAddProductModal() {
             document.getElementById('product-form').reset();
             document.getElementById('product-id').value = '';
+            document.getElementById('p-price').value = "40.00"; 
             document.getElementById('p-image-data').value = '';
             document.getElementById('p-image-file').value = '';
-            document.getElementById('upload-preview-state').innerHTML = `<p class="text-[9px] text-gray-400">Clique para selecionar foto</p>`;
-            document.getElementById('modal-title').textContent = `Cadastrar Novo Perfume`;
+            document.getElementById('upload-preview-state').innerHTML = `
+                <i data-lucide="image" class="w-5 h-5 text-gold/60 mx-auto"></i>
+                <p class="text-[9px] text-gray-400">Clique para selecionar foto do celular ou computador</p>
+            `;
+            document.getElementById('modal-title').innerHTML = `Cadastrar Novo Perfume`;
             document.getElementById('product-modal').classList.remove('hidden');
             lucide.createIcons();
         }
@@ -858,10 +847,23 @@
             document.getElementById('p-volume').value = prod.volume || '';
             document.getElementById('p-origin').value = prod.origin;
             document.getElementById('p-scent').value = prod.scent;
+            document.getElementById('p-image-file').value = '';
             document.getElementById('p-image-data').value = prod.image || '';
             document.getElementById('p-desc').value = prod.desc;
 
-            document.getElementById('modal-title').textContent = `Editar Perfume`;
+            const previewState = document.getElementById('upload-preview-state');
+            if (prod.image && prod.image.trim() !== "") {
+                previewState.innerHTML = `
+                    <img src="${prod.image}" class="w-10 h-10 object-cover rounded mx-auto mb-1 border border-gold/40">
+                    <p class="text-[9px] text-gold font-medium">Foto carregada</p>
+                `;
+            } else {
+                previewState.innerHTML = `
+                    <i data-lucide="image" class="w-5 h-5 text-gold/60 mx-auto"></i>
+                    <p class="text-[9px] text-gray-400">Clique para selecionar foto</p>
+                `;
+            }
+            document.getElementById('modal-title').innerHTML = `Editar Perfume`;
             document.getElementById('product-modal').classList.remove('hidden');
             lucide.createIcons();
         }
@@ -870,7 +872,7 @@
             document.getElementById('product-modal').classList.add('hidden');
         }
 
-        // Envia as atualizações e cadastros para a Nuvem (Firestore)
+        // SALVAR DIRETAMENTE NO FIREBASE FIRESTORE
         function saveProduct(event) {
             event.preventDefault();
 
@@ -887,24 +889,47 @@
             };
 
             if (id) {
-                // Atualiza na Nuvem
-                productsCollection.doc(id).update(productData)
-                    .then(() => { showToast("Perfume atualizado online!"); closeProductModal(); })
-                    .catch(() => showToast("Erro ao atualizar online", "alert-triangle"));
+                // Atualiza produto existente no Firebase
+                db.collection("produtos").doc(id).update(productData)
+                .then(() => {
+                    showToast(`Perfume atualizado com sucesso no Firebase!`);
+                    closeProductModal();
+                })
+                .catch((error) => {
+                    console.error("Erro ao atualizar: ", error);
+                    showToast("Erro ao atualizar no banco de dados.", "alert-triangle");
+                });
             } else {
-                // Insere Novo na Nuvem
-                productData.createdAt = firebase.firestore.FieldValue.serverTimestamp();
-                productsCollection.add(productData)
-                    .then(() => { showToast("Adicionado ao catálogo online!"); closeProductModal(); })
-                    .catch(() => showToast("Erro ao salvar online", "alert-triangle"));
+                // Cria novo produto no Firebase
+                db.collection("produtos").add(productData)
+                .then(() => {
+                    showToast(`Adicionado ao estoque do Firebase!`);
+                    closeProductModal();
+                })
+                .catch((error) => {
+                    console.error("Erro ao adicionar: ", error);
+                    showToast("Erro ao salvar no banco de dados.", "alert-triangle");
+                });
             }
         }
 
+        // DELETAR DIRETAMENTE NO FIREBASE FIRESTORE
         function deleteProduct(id) {
-            if (confirm("Remover este perfume do catálogo online permanentemente?")) {
-                productsCollection.doc(id).delete()
-                    .then(() => showToast("Removido com sucesso"))
-                    .catch(() => showToast("Erro ao remover", "alert-triangle"));
+            const prod = products.find(p => p.id === id);
+            if (!prod) return;
+
+            if (confirm(`Remover "${prod.name}" definitivamente do estoque?`)) {
+                db.collection("produtos").doc(id).delete()
+                .then(() => {
+                    cart = cart.filter(item => item.id !== id);
+                    localStorage.setItem('ralex_clean_cart', JSON.stringify(cart));
+                    updateCartCount();
+                    showToast(`Perfume removido do banco de dados`);
+                })
+                .catch((error) => {
+                    console.error("Erro ao deletar: ", error);
+                    showToast("Erro ao deletar do banco de dados.", "alert-triangle");
+                });
             }
         }
     </script>
