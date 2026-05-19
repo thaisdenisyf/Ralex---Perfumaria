@@ -545,79 +545,6 @@ window.saveProduct = async function(event) {
             showToast("Produto adicionado!", "check-circle");
         }
 
-        let isSellerAuthenticated = false;
-
-window.requestAdminAccess = function() {
-
-    if (isSellerAuthenticated) {
-        changeView('seller');
-        return;
-    }
-
-    document.getElementById('auth-modal')
-        .classList.remove('hidden');
-}
-
-window.closeAuthModal = function() {
-
-    document.getElementById('auth-modal')
-        .classList.add('hidden');
-}
-
-window.verifyAdminPassword = function(event) {
-
-    event.preventDefault();
-
-    const password =
-        document.getElementById('admin-password').value;
-
-    if (password === "Raquel2026") {
-
-        isSellerAuthenticated = true;
-
-        closeAuthModal();
-
-        showToast("Acesso liberado!", "shield");
-
-        changeView('seller');
-
-    } else {
-
-        showToast("Senha incorreta", "alert-triangle");
-    }
-}
-
-window.changeView = function(view) {
-
-    const customer =
-        document.getElementById('customer-view');
-
-    const seller =
-        document.getElementById('seller-view');
-
-    const hero =
-        document.getElementById('hero-banner');
-
-    if (view === 'seller') {
-
-        customer.classList.add('hidden');
-
-        seller.classList.remove('hidden');
-
-        hero.classList.add('hidden');
-
-        renderAdminProductsTable();
-
-    } else {
-
-        customer.classList.remove('hidden');
-
-        seller.classList.add('hidden');
-
-        hero.classList.remove('hidden');
-    }
-}
-
         closeProductModal();
 
     } catch (error) {
@@ -764,7 +691,78 @@ function showToast(message, iconName = "check-circle") {
         toast.classList.add('translate-y-20', 'opacity-0');
     }, 3000);
 }
+let isSellerAuthenticated = false;
 
+window.requestAdminAccess = function() {
+
+    if (isSellerAuthenticated) {
+        changeView('seller');
+        return;
+    }
+
+    document.getElementById('auth-modal')
+        .classList.remove('hidden');
+}
+
+window.closeAuthModal = function() {
+
+    document.getElementById('auth-modal')
+        .classList.add('hidden');
+}
+
+window.verifyAdminPassword = function(event) {
+
+    event.preventDefault();
+
+    const password =
+        document.getElementById('admin-password').value;
+
+    if (password === "Raquel2026") {
+
+        isSellerAuthenticated = true;
+
+        closeAuthModal();
+
+        showToast("Acesso liberado!", "shield");
+
+        changeView('seller');
+
+    } else {
+
+        showToast("Senha incorreta", "alert-triangle");
+    }
+}
+
+window.changeView = function(view) {
+
+    const customer =
+        document.getElementById('customer-view');
+
+    const seller =
+        document.getElementById('seller-view');
+
+    const hero =
+        document.getElementById('hero-banner');
+
+    if (view === 'seller') {
+
+        customer.classList.add('hidden');
+
+        seller.classList.remove('hidden');
+
+        hero.classList.add('hidden');
+
+        renderAdminProductsTable();
+
+    } else {
+
+        customer.classList.remove('hidden');
+
+        seller.classList.add('hidden');
+
+        hero.classList.remove('hidden');
+    }
+}
 </script>
 </body>
 </html>
