@@ -108,18 +108,20 @@
             
             <section id="customer-view" class="space-y-8">
                 
-                <div class="flex flex-col md:flex-row gap-4 items-center justify-between pb-6 border-b border-white/5">
-                    <div class="relative w-full md:w-80">
-                        <i data-lucide="search" class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500"></i>
-                        <input type="text" id="search-input" oninput="filterProducts()" placeholder="Buscar perfume..." class="w-full bg-dark-900 border border-white/5 focus:border-gold/50 rounded-lg pl-10 pr-4 py-2 text-xs text-gray-200 placeholder-gray-500 focus:outline-none transition-all">
-                    </div>
+               <div class="flex flex-col md:flex-row gap-4 items-center justify-between pb-6 border-b border-white/5">
+    
+    <div class="relative w-full md:w-80">
+        <i data-lucide="search" class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500"></i>
+        <input type="text" id="search-input" oninput="filterProducts()" placeholder="Buscar perfume..." class="w-full bg-dark-900 border border-white/5 focus:border-gold/50 rounded-lg pl-10 pr-4 py-2 text-xs text-gray-200 placeholder-gray-500 focus:outline-none transition-all">
+    </div>
 
-     <div class="flex flex-wrap gap-2 items-center justify-center md:justify-end w-full md:w-auto">
-    <button onclick="filterCategory('todos')" class="filter-tab active bg-gold text-dark-950 font-medium px-4 py-2 rounded text-[10px] uppercase tracking-wider transition-all whitespace-nowrap">Todos</button>
-    <button onclick="filterCategory('feminino')" class="filter-tab bg-dark-900 text-gray-400 border border-white/5 hover:border-gold/30 hover:text-white px-4 py-2 rounded text-[10px] uppercase tracking-wider transition-all whitespace-nowrap">Femininos</button>
-    <button onclick="filterCategory('masculino')" class="filter-tab bg-dark-900 text-gray-400 border border-white/5 hover:border-gold/30 hover:text-white px-4 py-2 rounded text-[10px] uppercase tracking-wider transition-all whitespace-nowrap">Masculinos</button>
+    <div class="flex flex-wrap gap-2 items-center justify-center md:justify-end w-full md:w-auto">
+        <button onclick="filterCategory('todos')" class="filter-tab active bg-gold text-dark-950 font-medium px-4 py-2 rounded text-[10px] uppercase tracking-wider transition-all whitespace-nowrap">Todos</button>
+        <button onclick="filterCategory('feminino')" class="filter-tab bg-dark-900 text-gray-400 border border-white/5 hover:border-gold/30 hover:text-white px-4 py-2 rounded text-[10px] uppercase tracking-wider transition-all whitespace-nowrap">Femininos</button>
+        <button onclick="filterCategory('masculino')" class="filter-tab bg-dark-900 text-gray-400 border border-white/5 hover:border-gold/30 hover:text-white px-4 py-2 rounded text-[10px] uppercase tracking-wider transition-all whitespace-nowrap">Masculinos</button>
+    </div>
+
 </div>
-
                 <div class="space-y-6">
                     <div class="flex justify-between items-center">
                         <h2 class="font-luxury text-xl tracking-wider text-white">Nossa <span class="text-gold">Seleção</span></h2>
